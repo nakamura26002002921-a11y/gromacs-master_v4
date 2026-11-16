@@ -167,6 +167,15 @@ def parse_net_port(value):
     host, port = value.rsplit(":", 1)
     return host, int(port)
 
+@app.route("/api/handshake", methods=["GET"])
+def handshake():
+    return jsonify({
+        "status": "ok",
+        "message": "接続成功",
+        "server": "orchestrator",
+        "version": "1.0"
+    }), 200
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--net-port", type=parse_net_port, default=None, metavar="HOST:PORT", help="ローカルネットワーク用の待受アドレスとポート")
