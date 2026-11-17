@@ -15,7 +15,7 @@ import time
 import uuid
 from pathlib import Path
 from groq import Groq
-
+from datetime import datetime
 
 SYSTEM_PROMPT = """
 Purpose:
@@ -137,7 +137,8 @@ def main():
 
     plan = json.loads(Path(a.plan).read_text(encoding="utf-8"))
     history_path = Path(a.history) if a.history else Path("history.json")
-    log_path = Path(a.logpath) if a.logpath else Path("orchestrater.log")
+    log_path = Path(a.logpath) if a.logpath else Path("logs") / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
     history = []
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
     start = a.start or next(iter(plan))
