@@ -88,14 +88,16 @@ def call_llm_assistant(messages, history, api_key):
     return json.loads(result)
 
 def create_approval_request(server_url, request_id, command, purpose):
-    response = requests.post(f"{server_url}/api/requests", json={"id": request_id, "purpose": purpose, "command": command}, timeout=10)
-    data = response.json()
-    print(f"Approval request: {data}")
-    return data
+    tool_path = Path(__file__).parent / "tools" / "server_cli.py"
+    result = subprocess.run([sys.executable, str(tool_path), "--id", request_id, "--cmd", command, "--purpose", purpose, "--approval-state", "False", "--url", server_url], capture_output=True, text=True, check=True)
+    print(result.stdout)
+    return result.stdout
 
 def get_approval_request(server_url, request_id):
-    response = requests.get(f"{server_url}/api/requests/{request_id}", timeout=10)
-    return response.json()
+    tool_path = Path(__file__).parent / "tools" / "server_get.py"
+    result = subprocess.run([sys.executable, str(tool_path), "--id", request_id, "--url", server_url], capture_output=True, text=True, check=True)
+    data = json.loads(result.stdout)[request_id]
+    return {"command": data["実行コマンド"], "purpose": data["目的"], "status": "承認済み" if data["承認"] else "承認待ち"}
 
 def wait_for_approval(server_url, request_id, timeout, interval):
     started = time.time()
